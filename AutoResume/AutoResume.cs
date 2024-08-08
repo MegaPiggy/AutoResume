@@ -26,7 +26,7 @@ namespace AutoResume
             titleAnimationController._optionsFadeSpacing = 0.001f;
 
             // Need to wait a little bit for some reason.
-            ModHelper.Events.Unity.FireOnNextUpdate(Resume);
+            ModHelper.Events.Unity.RunWhen(() => PlayerData._currentGameSave != null, Resume);
 
             GlobalMessenger.AddListener("WakeUp", OnWakeUp);
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -40,8 +40,15 @@ namespace AutoResume
 
         private void Resume()
         {
+            var resumeGameAction = FindObjectOfType<TitleScreenManager>()._resumeGameAction;
+
+            if (PlayerData.GetWarpedToTheEye())
+                resumeGameAction.SetSceneToLoad(SubmitActionLoadScene.LoadableScenes.EYE);
+            else
+                resumeGameAction.SetSceneToLoad(SubmitActionLoadScene.LoadableScenes.GAME);
+
             // Simulate "resume game" button press.
-            FindObjectOfType<TitleScreenManager>()._resumeGameAction.ConfirmSubmit();
+            resumeGameAction.ConfirmSubmit();
         }
 
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
